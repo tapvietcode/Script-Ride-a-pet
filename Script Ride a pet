@@ -1,0 +1,323 @@
+-- ==========================================
+-- Script Name: bestscriptVn🇻🇳
+-- Red Theme UI with Image Customization, Speed Slider (1-10000) & Egg Finder (1M-1Qa) - Outside Base Only
+-- ==========================================
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+local RootPart = Character:WaitForChild("HumanoidRootPart")
+
+-- Update character reference upon respawn
+LocalPlayer.CharacterAdded:Connect(function(newChar)
+    Character = newChar
+    Humanoid = newChar:WaitForChild("Humanoid")
+    RootPart = newChar:WaitForChild("HumanoidRootPart")
+end)
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "BestScriptVn_GUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = game.CoreGui
+
+-- ==========================================
+-- 1. TOGGLE MENU BUTTON (Using Image 2 as icon)
+-- ==========================================
+local ToggleBtn = Instance.new("ImageButton")
+ToggleBtn.Name = "ToggleBtn"
+ToggleBtn.Size = UDim2.new(0, 60, 0, 60)
+ToggleBtn.Position = UDim2.new(0, 20, 0.5, -30)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(220, 20, 60)
+-- NOTE: Replace "ID_ANH_2" with the Roblox asset ID of Image 2
+ToggleBtn.Image = "rbxassetid://ID_ANH_2" 
+ToggleBtn.Parent = ScreenGui
+
+local ToggleCorner = Instance.new("UICorner")
+ToggleCorner.CornerRadius = UDim.new(1, 0) -- Perfect circle
+ToggleCorner.Parent = ToggleBtn
+
+local ToggleStroke = Instance.new("UIStroke")
+ToggleStroke.Color = Color3.fromRGB(255, 255, 255)
+ToggleStroke.Thickness = 2.5
+ToggleStroke.Parent = ToggleBtn
+
+-- ==========================================
+-- 2. MAIN MENU FRAME (Using Image 1 as background)
+-- ==========================================
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 360, 0, 460)
+MainFrame.Position = UDim2.new(0.5, -180, 0.5, -230)
+MainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Visible = false
+MainFrame.Parent = ScreenGui
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 16)
+MainCorner.Parent = MainFrame
+
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Color = Color3.fromRGB(220, 20, 60)
+MainStroke.Thickness = 3
+MainStroke.Parent = MainFrame
+
+-- Background image layer for Image 1 inside Menu
+local BgImage = Instance.new("ImageLabel")
+BgImage.Size = UDim2.new(1, 0, 1, 0)
+BgImage.BackgroundTransparency = 1
+-- NOTE: Replace "ID_ANH_1" with the Roblox asset ID of Image 1
+BgImage.Image = "rbxassetid://ID_ANH_1"
+BgImage.ImageTransparency = 0.75 -- Transparency to keep text readable
+BgImage.ZIndex = 0
+BgImage.Parent = MainFrame
+
+-- Title Bar
+local TitleBar = Instance.new("Frame")
+TitleBar.Size = UDim2.new(1, 0, 0, 50)
+TitleBar.BackgroundColor3 = Color3.fromRGB(220, 20, 60)
+TitleBar.BorderSizePixel = 0
+TitleBar.Parent = MainFrame
+
+local TitleCorner = Instance.new("UICorner")
+TitleCorner.CornerRadius = UDim.new(0, 16)
+TitleCorner.Parent = TitleBar
+
+local TitleCover = Instance.new("Frame")
+TitleCover.Size = UDim2.new(1, 0, 0, 15)
+TitleCover.Position = UDim2.new(0, 0, 1, -15)
+TitleCover.BackgroundColor3 = Color3.fromRGB(220, 20, 60)
+TitleCover.BorderSizePixel = 0
+TitleCover.Parent = TitleBar
+
+local TitleText = Instance.new("TextLabel")
+TitleText.Size = UDim2.new(1, 0, 1, 0)
+TitleText.BackgroundTransparency = 1
+TitleText.Text = "bestscriptVn 🇻🇳"
+TitleText.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleText.TextSize = 20
+TitleText.Font = Enum.Font.FredokaOne
+TitleText.Parent = TitleBar
+
+ToggleBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = not MainFrame.Visible
+end)
+
+-- ==========================================
+-- 3. CREATE BUTTONS & FEATURES
+-- ==========================================
+local function createButton(posY, text)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0.85, 0, 0, 45)
+    btn.Position = UDim2.new(0.075, 0, 0, posY)
+    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 14
+    btn.Font = Enum.Font.GothamBold
+    btn.Parent = MainFrame
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 10)
+    corner.Parent = btn
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(220, 20, 60)
+    stroke.Thickness = 1.5
+    stroke.Parent = btn
+    
+    return btn
+end
+
+-- 2 Main Toggle Buttons
+local SpeedToggleBtn = createButton(65, "⚡ Speed Boost: OFF")
+local EggTeleportBtn = createButton(125, "🥚 Teleport Best Egg (1M - 1Qa)")
+
+-- ==========================================
+-- 4. SPEED SLIDER (1 to 10000)
+-- ==========================================
+local function createSlider(posY, title, minVal, maxVal, defaultVal, callback)
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(0.85, 0, 0, 55)
+    container.Position = UDim2.new(0.075, 0, 0, posY)
+    container.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    container.BorderSizePixel = 0
+    container.Parent = MainFrame
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 10)
+    corner.Parent = container
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(220, 20, 60)
+    stroke.Thickness = 1.5
+    stroke.Parent = container
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 0, 25)
+    label.Position = UDim2.new(0, 0, 0, 2)
+    label.BackgroundTransparency = 1
+    label.Text = title .. ": " .. defaultVal
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.TextSize = 13
+    label.Font = Enum.Font.GothamBold
+    label.Parent = container
+
+    local sliderBar = Instance.new("Frame")
+    sliderBar.Size = UDim2.new(0.85, 0, 0, 8)
+    sliderBar.Position = UDim2.new(0.075, 0, 0, 35)
+    sliderBar.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    sliderBar.BorderSizePixel = 0
+    sliderBar.Parent = container
+
+    local barCorner = Instance.new("UICorner")
+    barCorner.CornerRadius = UDim.new(1, 0)
+    barCorner.Parent = sliderBar
+
+    local sliderFill = Instance.new("Frame")
+    sliderFill.Size = UDim2.new((defaultVal - minVal) / (maxVal - minVal), 0, 1, 0)
+    sliderFill.BackgroundColor3 = Color3.fromRGB(220, 20, 60)
+    sliderFill.BorderSizePixel = 0
+    sliderFill.Parent = sliderBar
+
+    local fillCorner = Instance.new("UICorner")
+    fillCorner.CornerRadius = UDim.new(1, 0)
+    fillCorner.Parent = sliderFill
+
+    local value = defaultVal
+    local uis = game:GetService("UserInputService")
+    local dragging = false
+
+    sliderBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+        end
+    end)
+
+    uis.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
+    end)
+
+    uis.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local pos = sliderBar.AbsolutePosition.X
+            local size = sliderBar.AbsoluteSize.X
+            local mousePos = input.Position.X
+            local p = math.clamp((mousePos - pos) / size, 0, 1)
+            sliderFill.Size = UDim2.new(p, 0, 1, 0)
+            value = math.floor(minVal + (maxVal - minVal) * p)
+            label.Text = title .. ": " .. value
+            callback(value)
+        end
+    end)
+end
+
+local currentCustomSpeed = 16
+local speedActive = false
+
+createSlider(185, "⚡ WalkSpeed (1-10000)", 1, 10000, 16, function(val)
+    currentCustomSpeed = val
+    if speedActive and Humanoid then
+        Humanoid.WalkSpeed = val
+    end
+end)
+
+SpeedToggleBtn.MouseButton1Click:Connect(function()
+    speedActive = not speedActive
+    if speedActive then
+        SpeedToggleBtn.Text = "⚡ Speed Boost: ON"
+        if Humanoid then Humanoid.WalkSpeed = currentCustomSpeed end
+    else
+        SpeedToggleBtn.Text = "⚡ Speed Boost: OFF"
+        if Humanoid then Humanoid.WalkSpeed = 16 end
+    end
+end)
+
+-- ==========================================
+-- 5. SMART EGG FINDER (1M - 1Qa) - OUTSIDE BASE ONLY
+-- ==========================================
+local function parseEggValue(str)
+    str = str:upper()
+    local num = tonumber(str:match("[%d%.]+"))
+    if not num then return 0 end
+    if str:find("QA") then
+        num = num * 1e15
+    elseif str:find("T") then
+        num = num * 1e12
+    elseif str:find("B") then
+        num = num * 1e9
+    elseif str:find("M") then
+        num = num * 1e6
+    elseif str:find("K") then
+        num = num * 1e3
+    end
+    return num
+end
+
+-- Function to check if an object is inside a base/plot
+local function isInsideBase(item)
+    local current = item.Parent
+    while current and current ~= workspace do
+        local name = current.Name:lower()
+        if name:find("base") or name:find("plot") or name:find("tycoon") or name:find("home") then
+            return true
+        end
+        current = current.Parent
+    end
+    return false
+end
+
+EggTeleportBtn.MouseButton1Click:Connect(function()
+    local bestEgg = nil
+    local maxVal = -1
+    local minTarget = 1e6   -- 1M
+    local maxTarget = 1e15  -- 1Qa
+
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("Model") and (string.find(obj.Name:lower(), "egg") or string.find(obj.Name:lower(), "trứng")) then
+            -- Chỉ lấy trứng ở ngoài base (bỏ qua trứng ở trong base)
+            if not isInsideBase(obj) then
+                local eval = parseEggValue(obj.Name)
+                for _, desc in ipairs(obj:GetDescendants()) do
+                    if desc:IsA("TextLabel") or desc:IsA("TextButton") then
+                        local parsed = parseEggValue(desc.Text)
+                        if parsed > eval then
+                            eval = parsed
+                        end
+                    end
+                end
+
+                if eval >= minTarget and eval <= maxTarget and eval > maxVal then
+                    maxVal = eval
+                    bestEgg = obj
+                end
+            end
+        end
+    end
+
+    -- Fallback: nếu không tìm thấy trong khoảng 1M-1Qa ở ngoài map, tìm trứng cao nhất ở ngoài map
+    if not bestEgg then
+        for _, obj in ipairs(workspace:GetDescendants()) do
+            if obj:IsA("Model") and (string.find(obj.Name:lower(), "egg") or string.find(obj.Name:lower(), "trứng")) then
+                if not isInsideBase(obj) then
+                    local eval = parseEggValue(obj.Name)
+                    if eval > maxVal then
+                        maxVal = eval
+                        bestEgg = obj
+                    end
+                end
+            end
+        end
+    end
+
+    if bestEgg and bestEgg:FindFirstChildWhichIsA("BasePart") then
+        RootPart.CFrame = bestEgg:FindFirstChildWhichIsA("BasePart").CFrame + Vector3.new(0, 3, 0)
+    else
+        print("Không tìm thấy trứng nào ở bên ngoài bản đồ!")
+    end
+end)
